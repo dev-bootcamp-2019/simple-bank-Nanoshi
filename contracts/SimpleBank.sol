@@ -9,7 +9,7 @@ contract SimpleBank {
     mapping (address => uint) private balances;
     
     /* Fill in the keyword. We want to create a getter function and allow contracts to be able to see if a user is enrolled.  */
-    mapping (address => bool) enrolled;
+    mapping (address => bool) enrolledStatus;
 
     /* Let's make sure everyone knows who owns the bank. Use the appropriate keyword for this*/
     address public owner;
@@ -22,7 +22,7 @@ contract SimpleBank {
     event LogEnrolled(address accountAddress);
 
     /* Add 2 arguments for this event, an accountAddress and an amount */
-    event LogDepositMade(address accountAddress);
+    event LogDepositMade(address accountAddress, uint amount);
 
     /* Create an event called LogWithdrawal */
     event LogWithdrawal(address accountAddress, uint withdrawAmount, uint newBalance);
@@ -52,10 +52,20 @@ contract SimpleBank {
     /// @return The users enrolled status
     // Emit the appropriate event
     function enroll() public returns (bool){
-        enrolled[msg.sender] = true;
-        if (enrolled[msg.sender] == true){
+        enrolledStatus[msg.sender] = true;
+        emit LogEnrolled(msg.sender);
+        if (enrolledStatus[msg.sender] == true){
             return true;
         }else{
+            return false;
+        }
+    }
+
+    function enrolled() public view returns (bool){
+        if (enrolledStatus[msg.sender] == true){
+            return true;
+        }
+        else{
             return false;
         }
     }
@@ -69,7 +79,7 @@ contract SimpleBank {
         /* Add the amount to the user's balance, call the event associated with a deposit,
           then return the balance of the user */
         balances[msg.sender] += msg.value;
-        emit LogDepositMade(msg.sender);
+        emit LogDepositMade(msg.sender, msg.value);
         return balances[msg.sender];
     }
 
@@ -86,6 +96,7 @@ contract SimpleBank {
         require (balances[msg.sender] >= withdrawAmount);
         balances[msg.sender] -= withdrawAmount;
         msg.sender.transfer(withdrawAmount);
+        return balances[msg.sender];
     }
 
     // Fallback function - Called if other functions don't match call or
