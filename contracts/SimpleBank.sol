@@ -61,8 +61,8 @@ contract SimpleBank {
         }
     }
 
-    function enrolled() public view returns (bool){
-        if (enrolledStatus[msg.sender] == true){
+    function enrolled(address check) public view returns (bool){
+        if (check == msg.sender && enrolledStatus[msg.sender] == true){
             return true;
         }
         else{
@@ -96,6 +96,7 @@ contract SimpleBank {
         require (balances[msg.sender] >= withdrawAmount);
         balances[msg.sender] -= withdrawAmount;
         msg.sender.transfer(withdrawAmount);
+        emit LogWithdrawal(msg.sender, withdrawAmount, balances[msg.sender]);
         return balances[msg.sender];
     }
 
